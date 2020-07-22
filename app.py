@@ -11,7 +11,7 @@ db = pymysql.connect(host='localhost',
                         passwd='1234', 
                         db='myflaskapp')
 
-
+cursor = db.cursor()
 # init mysql
 # mysql = MySQL(app)
 
@@ -47,22 +47,24 @@ def register():
         # name = form.name.data
         if(password == re_password):
             print([name, email , password , re_password , username])
-            cursor = db.cursor()
-            sql = '''
-                INSERT INTO users (name , email , username , password) 
-                VALUES (%s ,%s,%s,%s )
-             '''
-            cursor.execute(sql , (name,email,username,password ))
-            db.commit()
-            db.close()
+            
+            # sql = '''
+            #     INSERT INTO users (name , email , password, re_password ,username) 
+            #     VALUES (%s ,%s,%s,%s )
+            #  '''
+            # cursor.execute(sql , (name,email,username,password ))
+            # db.commit()
+            
+
             # cursor = db.cursor()
             # cursor.execute('SELECT * FROM users;')
             # users = cursor.fetchall()
             return "register Success"
         else:
             return "Invalid Password"
+            db.close()
     else:
-        return "GET Success"
+        return render_template('register.html')
 
 
 @app.route('/articles')       #methods = ['GET','POST'])로 추가 가능
