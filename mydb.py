@@ -64,6 +64,7 @@ sql_4=  '''
 # db.commit()
 # db.close()
 
+
 sql_5='DELETE FROM `myflaskapp`.`users` WHERE  `id`=11;'
 # cursor.execute(sql_5)
 # db.commit()
@@ -74,7 +75,29 @@ sql_6='DELETE FROM users WHERE name="SONG";'
 # db.commit()
 # db.close()
 
+
+
 sql_7 = 'UPDATE `users` SET `name`="PARK" WHERE  `id`=6;'
-cursor.execute(sql_7)
-db.commit()
-db.close()
+# cursor.execute(sql_7)
+# db.commit()
+# db.close()
+
+title='javascript'
+body='프로토타입기반의 객체지향 프로그래밍 언어로, 스크립트 언어에 해당된다. 특수한 목적이 아닌 이상 모든 웹 브라우저에 인터프리터가 내장되어 있다. 오늘날 HTML, CSS와 함께 웹을 구성하는 요소 중 하나다. HTML이 웹 페이지의 기본 구조를 담당하고, CSS가 디자인을 담당한다면 JavaScript는 클라이언트 단에서 웹 페이지가 동작하는 것을 담당한다.'
+author='JH'
+sql_8=  '''
+        INSERT INTO topic(title, body , author) 
+        VALUES (%s , %s, %s);
+            '''
+
+
+# cursor.execute(sql_8, (title, body , author))
+# db.commit()
+# db.close()
+
+
+sql_8 = 'SELECT * FROM topic;'
+
+cursor.execute(sql_8)
+topics = cursor.fetchall()
+print(topics)
