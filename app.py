@@ -35,11 +35,19 @@ def is_LOGED_out(f):
 
     return wrap
 
+def is_admin(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if session['username'] == "ADMIN":
+            return render_template('admin.html')
+        else :
+            return f(*args, **kwargs)
+    return wrap
+
 @app.route('/register',methods=['GET' ,'POST'])
 @is_LOGED_out
 def register():
     if request.method == 'POST':
-
         # data = request.body.get('author')
         name = request.form.get('name')
         email = request.form.get('email')
@@ -47,25 +55,34 @@ def register():
         re_password = request.form.get('re_password')
         username = request.form.get('username')
         # name = form.name.data
-        if(pbkdf2_sha256.verify(re_password,password )):
-            print(pbkdf2_sha256.verify(re_password,password ))
-            cursor = db.cursor()
-            sql = '''
-                INSERT INTO users (name , email , username , password) 
-                VALUES (%s ,%s, %s, %s )
-             '''
-            cursor.execute(sql , (name,email,username,password ))
-            db.commit()
-            
-
-            # cursor = db.cursor()
-            # cursor.execute('SELECT * FROM users;')
-            # users = cursor.fetchall()
-            
-            return redirect(url_for('login'))
-
+        cursor = db.cursor()
+        sql = 'SELECT username FROM users WHERE username=%s'
+        cursor.execute(sql, [username])
+        username_1 = cursor.fetchone()
+        if username_1 :
+            return redirect(url_for('register'))
         else:
-            return "Invalid Password"
+            
+
+            if(pbkdf2_sha256.verify(re_password,password )):
+                print(pbkdf2_sha256.verify(re_password,password ))
+                
+                sql = '''
+                    INSERT INTO users (name , email , username , password) 
+                    VALUES (%s ,%s, %s, %s )
+                '''
+                cursor.execute(sql , (name,email,username,password ))
+                db.commit()
+                
+
+                # cursor = db.cursor()
+                # cursor.execute('SELECT * FROM users;')
+                # users = cursor.fetchall()
+                
+                return redirect(url_for('login'))
+
+            else:
+                return redirect(url_for('register'))
 
         db.close()
     else:
@@ -76,11 +93,11 @@ def register():
 @is_LOGED_out
 def login():
     if request.method == 'POST':
-        id = request.form['email']
+        id = request.form['username']
         pw = request.form.get('password')
         print([id])
 
-        sql='SELECT * FROM users WHERE email = %s'
+        sql='SELECT * FROM users WHERE username = %s'
         cursor  = db.cursor()
         cursor.execute(sql, [id])
         users = cursor.fetchone()
@@ -93,9 +110,9 @@ def login():
                 session['is_LOGED'] = True
                 session['username'] = users[3]
                 print(session)
-                return redirect(url_for('articles'))
+                return redirect('/')
             else:
-                return redirect(url_for('login'))
+                return redirect('/')
         
     else:
         return render_template('login.html')
@@ -123,6 +140,8 @@ def logout():
 
 @app.route('/')
 @is_LOGED_in
+@is_admin
+
 def index():
     print("Success")
     # session['test']= "Gary Kim"
