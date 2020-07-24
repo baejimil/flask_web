@@ -39,10 +39,20 @@ def is_admin(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         if session['username'] == "ADMIN":
-            return render_template('admin.html')
+            return redirect('/admin')
         else :
             return f(*args, **kwargs)
     return wrap
+
+def is_admined(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if session['username'] != "ADMIN":
+            return redirect('/')
+        else:
+            return f(*args, **kwargs)
+    return wrap
+
 
 @app.route('/register',methods=['GET' ,'POST'])
 @is_LOGED_out
@@ -130,6 +140,38 @@ def is_LOGED_in(f):
             flash('UnAuthorized, Please login', 'danger')
             return redirect(url_for('login'))
     return _wraper
+
+@app.route('/admin', methods= ['GET','POST'])
+@is_LOGED_in
+@is_admined
+def admin():
+    cursor = db.cursor()
+    sql = 'SELECT * FROM users;'
+    cursor.execute(sql)
+    admin_user = cursor.fetchall()
+    return render_template('admin.html', data= admin_user)
+
+@app.route('/user/<string:id>', methods=['GET', 'POST'])
+@is_LOGED_in
+@is_admined
+def change_level(id):
+    if request.method =='POST':
+        cursor=db.cursor()
+        sql = 'UPDATE `users` SET `auth`=%s WHERE  `id`=%s;'
+        
+        auth = request.form['auth']
+        cursor.execute(sql ,[auth,id])
+        return redirect('/')
+    else:
+        cursor=db.cursor()
+        sql = "SELECT * FROM users WHERE id=%s"
+        cursor.execute(sql,[id])
+        user = cursor.fetchone()
+        return render_template('change_level.html', users=user)
+        
+
+
+
 
 @app.route('/logout')
 @is_LOGED_in
@@ -232,7 +274,7 @@ def edit_article(id):
         return render_template('edit_article.html', data= topic)
   
 
-@app.route('/delete/<string:id>', methods=['POST'])
+@app.route('/deletedelete/<string:id>', methods=['POST'])
 @is_LOGED_in
 def delete(id):
     cursor = db.cursor()
